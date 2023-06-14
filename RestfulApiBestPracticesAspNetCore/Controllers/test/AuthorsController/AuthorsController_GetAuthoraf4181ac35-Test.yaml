@@ -1,0 +1,52 @@
+config:
+  target: "https://api.example.com"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+
+scenarios:
+  - name: "Successful API request"
+    flow:
+      - get:
+          url: "/authors/{{ $randomGuid }}"
+          qs:
+            fields: "id,name"
+          capture:
+            json: "$.id"
+            as: "authorId"
+          expect:
+            - statusCode: 200
+            - hasProperty: "id"
+            - hasProperty: "name"
+            - equals: ["$.id", "{{ authorId }}"]
+  - name: "API request with validation failure"
+    flow:
+      - get:
+          url: "/authors/{{ $randomGuid }}"
+          qs:
+            fields: "invalidField"
+          expect:
+            - statusCode: 400
+  - name: "API request with edge case"
+    flow:
+      - get:
+          url: "/authors/{{ $randomGuid }}"
+          qs:
+            fields: "id,name,biography"
+          capture:
+            json: "$.id"
+            as: "authorId"
+          expect:
+            - statusCode: "{{ $between(200, 299) }}"
+            - hasProperty: "id"
+            - hasProperty: "name"
+            - hasProperty: "biography"
+            - equals: ["$.id", "{{ authorId }}"]
+  - name: "API request with not found author"
+    flow:
+      - get:
+          url: "/authors/00000000-0000-0000-0000-000000000000"
+          qs:
+            fields: "id,name"
+          expect:
+            - statusCode: 404

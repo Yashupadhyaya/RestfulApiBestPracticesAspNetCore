@@ -1,0 +1,46 @@
+config:
+  target: "https://api.example.com"
+  phases:
+    - duration: 60
+      arrivalRate: 10
+
+scenarios:
+  - name: "Successful API request"
+    flow:
+      - get:
+          url: "/GetRoot"
+          headers:
+            Accept: "application/vnd.marvin.hateoas+json"
+        expect:
+          - statusCode: 200
+          - hasProperty: "links"
+
+  - name: "API request with no content"
+    flow:
+      - get:
+          url: "/GetRoot"
+          headers:
+            Accept: "application/json"
+        expect:
+          - statusCode: 204
+
+  - name: "API request with invalid media type"
+    flow:
+      - get:
+          url: "/GetRoot"
+          headers:
+            Accept: "invalid/type"
+        expect:
+          - statusCode: 204
+
+  - name: "API request with edge case - large media type value"
+    flow:
+      - get:
+          url: "/GetRoot"
+          headers:
+            Accept: "{{ largeMediaType }}"
+        expect:
+          - statusCode: 204
+
+variables:
+  largeMediaType: "{{ 'a' | repeat(10000) }}"

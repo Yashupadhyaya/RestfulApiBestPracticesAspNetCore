@@ -1,0 +1,82 @@
+config:
+  target: 'https://api.example.com'
+  phases:
+    - duration: 60
+      arrivalRate: 5
+
+scenarios:
+  - name: 'Successful API request'
+    flow:
+      - get:
+          url: "/authors/{{authorId}}/books/{{bookId}}"
+          headers:
+            Authorization: "Bearer {{token}}"
+        expect:
+          - statusCode: 200
+          - hasProperty: "data"
+          - equals:
+              - "data.authorId"
+              - "{{authorId}}"
+          - equals:
+              - "data.id"
+              - "{{bookId}}"
+
+  - name: 'API request with non-existing author'
+    flow:
+      - get:
+          url: "/authors/{{nonExistingAuthorId}}/books/{{bookId}}"
+          headers:
+            Authorization: "Bearer {{token}}"
+        expect:
+          - statusCode: 404
+
+  - name: 'API request with non-existing book'
+    flow:
+      - get:
+          url: "/authors/{{authorId}}/books/{{nonExistingBookId}}"
+          headers:
+            Authorization: "Bearer {{token}}"
+        expect:
+          - statusCode: 404
+
+  - name: 'API request with invalid authorId format'
+    flow:
+      - get:
+          url: "/authors/invalid_author_id/books/{{bookId}}"
+          headers:
+            Authorization: "Bearer {{token}}"
+        expect:
+          - statusCode: 400
+          - hasProperty: "error"
+          - equals:
+              - "error.message"
+              - "Invalid authorId format"
+
+  - name: 'API request with invalid bookId format'
+    flow:
+      - get:
+          url: "/authors/{{authorId}}/books/invalid_book_id"
+          headers:
+            Authorization: "Bearer {{token}}"
+        expect:
+          - statusCode: 400
+          - hasProperty: "error"
+          - equals:
+              - "error.message"
+              - "Invalid bookId format"
+
+  - name: 'API request with edge case - large authorId and bookId'
+    flow:
+      - get:
+          url: "/authors/{{largeAuthorId}}/books/{{largeBookId}}"
+          headers:
+            Authorization: "Bearer {{token}}"
+        expect:
+          - statusCode: 200
+          - hasProperty: "data"
+          - equals:
+              - "data.authorId"
+              - "{{largeAuthorId}}"
+          - equals:
+              - "data.id"
+              - "{{largeBookId}}"

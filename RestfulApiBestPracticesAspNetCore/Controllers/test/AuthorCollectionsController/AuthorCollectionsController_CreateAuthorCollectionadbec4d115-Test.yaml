@@ -1,0 +1,47 @@
+config:
+  target: "https://example.com/api"
+  phases:
+    - duration: 60
+      arrivalRate: 10
+
+scenarios:
+  - name: "Successful API request"
+    flow:
+      - post:
+          url: "/authors"
+          json:
+            - firstName: "John"
+              lastName: "Doe"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            json: "$.id"
+            as: "authorId"
+          expect:
+            - statusCode: 201
+
+  - name: "API request with validation failure"
+    flow:
+      - post:
+          url: "/authors"
+          json:
+            - firstName: ""
+              lastName: "Doe"
+          headers:
+            Content-Type: "application/json"
+          expect:
+            - statusCode: 400
+            - hasProperty: "errorMessage"
+
+  - name: "API request with edge case"
+    flow:
+      - post:
+          url: "/authors"
+          json:
+            - firstName: "J@n€"
+              lastName: "Doe"
+          headers:
+            Content-Type: "application/json"
+          expect:
+            - statusCode: 201
+            - hasProperty: "id"

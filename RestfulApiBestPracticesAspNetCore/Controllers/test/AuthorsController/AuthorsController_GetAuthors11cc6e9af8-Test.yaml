@@ -1,0 +1,42 @@
+config:
+  target: 'https://dummy-api.com'
+  phases:
+    - duration: 60
+      arrivalRate: 10
+
+scenarios:
+  - name: 'Successful API request'
+    flow:
+      - get:
+          url: "/api/authors"
+          headers:
+            Accept: "application/json"
+          expect:
+            - statusCode: 200
+            - hasProperty: "totalCount"
+
+  - name: 'API request with validation failure'
+    flow:
+      - get:
+          url: "/api/authors"
+          headers:
+            Accept: "application/json"
+          qs:
+            orderBy: "invalidField"
+          expect:
+            - statusCode: 400
+
+  - name: 'API request with edge case'
+    flow:
+      - get:
+          url: "/api/authors"
+          headers:
+            Accept: "application/json"
+          qs:
+            fields: "id,name,genre"
+          expect:
+            - statusCode: 200
+            - hasProperty: "id"
+            - hasProperty: "name"
+            - hasProperty: "genre"
+            - notHasProperty: "links"

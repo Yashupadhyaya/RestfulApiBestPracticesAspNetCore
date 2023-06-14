@@ -1,0 +1,48 @@
+config:
+  target: "https://api.example.com"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+
+scenarios:
+  - name: "Successful API request"
+    flow:
+      - post:
+          url: "/authors/{{ authorId }}/books/{{ bookId }}"
+          json:
+            title: "Example Book"
+            description: "An example book for testing purposes"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            json: "$.id"
+            as: "bookId"
+          expect:
+            - statusCode: 200
+            - hasProperty: "id"
+
+  - name: "API request with validation failure"
+    flow:
+      - post:
+          url: "/authors/{{ authorId }}/books/{{ bookId }}"
+          json:
+            title: "Example Book"
+          headers:
+            Content-Type: "application/json"
+          expect:
+            - statusCode: 400
+            - hasProperty: "errorMessage"
+
+  - name: "API request with edge case"
+    flow:
+      - post:
+          url: "/authors/{{ authorId }}/books/{{ bookId }}"
+          json:
+            title: "Example Book with Special Characters: !@#$%^&*()_+"
+            description: "An example book for testing purposes with a very long description. This description is intentionally long to test the behavior of the API when handling large amounts of data. The description should still be processed correctly and the API should return an appropriate response."
+          headers:
+            Content-Type: "application/json"
+          expect:
+            - statusCode: 200
+            - hasProperty: "id"
+            - equals: ["$.title", "Example Book with Special Characters: !@#$%^&*()_+"]

@@ -1,0 +1,46 @@
+config:
+  target: 'https://example.com'
+  phases:
+    - duration: 60
+      arrivalRate: 5
+
+scenarios:
+  - name: 'Successful API request'
+    flow:
+      - post:
+          url: '/{{ id }}'
+          headers:
+            Content-Type: 'application/json'
+          expect:
+            - statusCode: 200
+    # The API should return a 200 status code for a successful request
+
+  - name: 'API request with validation failure'
+    flow:
+      - post:
+          url: '/{{ id }}'
+          headers:
+            Content-Type: 'application/json'
+          expect:
+            - statusCode: 400
+    # The API should return a 400 status code for a request with validation failure
+
+  - name: 'API request with edge case'
+    flow:
+      - post:
+          url: '/{{ id }}'
+          headers:
+            Content-Type: 'application/json'
+          expect:
+            - statusCode: 409
+    # The API should return a 409 status code for a request with edge case (author already exists)
+
+  - name: 'API request with not found error'
+    flow:
+      - post:
+          url: '/{{ id }}'
+          headers:
+            Content-Type: 'application/json'
+          expect:
+            - statusCode: 404
+    # The API should return a 404 status code for a request with not found error (author doesn't exist)
