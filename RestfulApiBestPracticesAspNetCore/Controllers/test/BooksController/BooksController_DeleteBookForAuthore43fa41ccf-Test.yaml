@@ -1,0 +1,49 @@
+config:
+  target: "https://example.com/api"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+
+scenarios:
+  - name: "Successful API request"
+    flow:
+      - delete:
+          url: "/authors/{{authorId}}/books/{{bookId}}"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            - json: "$.id"
+              as: "deletedBookId"
+          expect:
+            - statusCode: 204
+      - log: "Deleted book {{deletedBookId}} for author {{authorId}}"
+
+  - name: "API request with non-existent author"
+    flow:
+      - delete:
+          url: "/authors/{{nonExistentAuthorId}}/books/{{bookId}}"
+          headers:
+            Content-Type: "application/json"
+          expect:
+            - statusCode: 404
+      - log: "Request with non-existent author failed as expected"
+
+  - name: "API request with non-existent book"
+    flow:
+      - delete:
+          url: "/authors/{{authorId}}/books/{{nonExistentBookId}}"
+          headers:
+            Content-Type: "application/json"
+          expect:
+            - statusCode: 404
+      - log: "Request with non-existent book failed as expected"
+
+  - name: "API request with edge case: large author and book IDs"
+    flow:
+      - delete:
+          url: "/authors/{{largeAuthorId}}/books/{{largeBookId}}"
+          headers:
+            Content-Type: "application/json"
+          expect:
+            - statusCode: 204
+      - log: "Deleted book {{largeBookId}} for author {{largeAuthorId}} with edge case"

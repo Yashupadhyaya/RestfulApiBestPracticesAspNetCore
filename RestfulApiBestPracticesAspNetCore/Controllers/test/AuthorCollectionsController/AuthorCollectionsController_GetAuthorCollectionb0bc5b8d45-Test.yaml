@@ -1,0 +1,49 @@
+config:
+  target: 'https://api.example.com'
+  phases:
+    - duration: 60
+      arrivalRate: 5
+  ensure:
+    p99: 1000
+
+scenarios:
+  - name: 'Successful API request'
+    flow:
+      - get:
+          url: "/authors/({ids})"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            json: "$.data"
+            as: "responseData"
+      - think: 1
+      - log: "Received data: {{responseData}}"
+      - assert:
+          - statusCode: 200
+          - hasProperty: "data"
+
+  - name: 'API request with validation failure'
+    flow:
+      - get:
+          url: "/authors"
+          headers:
+            Content-Type: "application/json"
+      - think: 1
+      - assert:
+          - statusCode: 400
+          - hasProperty: "error"
+          - equals: "{{ error.message }}", "Invalid request"
+
+  - name: 'API request with edge case'
+    flow:
+      - get:
+          url: "/authors/({ids})"
+          headers:
+            Content-Type: "application/json"
+          qs:
+            ids: "12345678-1234-5678-1234-567812345678"
+      - think: 1
+      - assert:
+          - statusCode: 200
+          - hasProperty: "data"
+          - equals: "{{ data.authorId }}", "12345678-1234-5678-1234-567812345678"

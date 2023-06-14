@@ -1,0 +1,67 @@
+config:
+  target: "https://api.example.com"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+
+scenarios:
+  - name: "Successful API request"
+    flow:
+      - post:
+          url: "/authors/{{ authorId }}/books"
+          json:
+            title: "Valid Book Title"
+            description: "Valid Book Description"
+          headers:
+            Content-Type: "application/json"
+        expect:
+          - statusCode: 201
+          - hasProperty: "id"
+
+  - name: "API request with validation failure"
+    flow:
+      - post:
+          url: "/authors/{{ authorId }}/books"
+          json:
+            title: "Invalid Book"
+            description: "Invalid Book"
+          headers:
+            Content-Type: "application/json"
+        expect:
+          - statusCode: 422
+
+  - name: "API request with missing required fields"
+    flow:
+      - post:
+          url: "/authors/{{ authorId }}/books"
+          json:
+            title: "Missing Description"
+          headers:
+            Content-Type: "application/json"
+        expect:
+          - statusCode: 400
+
+  - name: "API request with non-existing author"
+    flow:
+      - post:
+          url: "/authors/{{ nonExistingAuthorId }}/books"
+          json:
+            title: "Valid Book Title"
+            description: "Valid Book Description"
+          headers:
+            Content-Type: "application/json"
+        expect:
+          - statusCode: 404
+
+  - name: "API request with edge case"
+    flow:
+      - post:
+          url: "/authors/{{ authorId }}/books"
+          json:
+            title: "Book with Special Characters: !@#$%^&*()_+"
+            description: "Book with a very long description. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed lacinia, quam eu fringilla ultricies, urna lorem venenatis sapien, eu facilisis libero ante at velit. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aenean condimentum bibendum sapien, vitae lacinia elit lacinia a. Phasellus rhoncus, odio ut fringilla volutpat, ante turpis ultrices nunc, id porttitor mi libero id libero. Etiam auctor, nunc ut bibendum bibendum, orci augue cursus metus, sit amet dapibus sapien odio non nisl."
+          headers:
+            Content-Type: "application/json"
+        expect:
+          - statusCode: 201
+          - hasProperty: "id"

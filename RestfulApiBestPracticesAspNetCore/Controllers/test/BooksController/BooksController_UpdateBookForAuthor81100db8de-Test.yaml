@@ -1,0 +1,48 @@
+config:
+  target: 'https://example.com'
+  phases:
+    - duration: 60
+      arrivalRate: 5
+
+scenarios:
+  - name: 'Successful API request'
+    flow:
+      - post:
+          url: '/api/authors/{{ authorId }}/books/{{ id }}'
+          json:
+            title: 'Valid Book Title'
+            description: 'Valid Book Description'
+          headers:
+            Content-Type: 'application/json'
+          capture:
+            - json: '$.id'
+              as: 'bookId'
+          expect:
+            - statusCode: 200
+            - hasProperty: 'id'
+
+  - name: 'API request with validation failure'
+    flow:
+      - post:
+          url: '/api/authors/{{ authorId }}/books/{{ id }}'
+          json:
+            title: 'Invalid Book Title'
+            description: 'Invalid Book Title'
+          headers:
+            Content-Type: 'application/json'
+          expect:
+            - statusCode: 400
+            - hasProperty: 'error'
+
+  - name: 'API request with edge case'
+    flow:
+      - post:
+          url: '/api/authors/{{ authorId }}/books/{{ id }}'
+          json:
+            title: 'Edge Case Book Title!@#$%^&*()_+'
+            description: 'Edge Case Book Description with a very long text that exceeds the normal limit of the description field. This should test how the API handles large amounts of data and special characters.'
+          headers:
+            Content-Type: 'application/json'
+          expect:
+            - statusCode: function(status) { return status >= 200 && status < 500; }
+            - hasProperty: 'id'

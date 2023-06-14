@@ -1,0 +1,56 @@
+config:
+  target: "https://api.example.com"
+  phases:
+    - duration: 60
+      arrivalRate: 10
+
+scenarios:
+  - name: "Successful API request"
+    flow:
+      - post:
+          url: "/author"
+          headers:
+            Content-Type: "application/vnd.marvin.author.full+json"
+          json:
+            firstName: "John"
+            lastName: "Doe"
+            dateOfBirth: "1990-01-01"
+            genre: "Fiction"
+          capture:
+            json: "$.id"
+            as: "authorId"
+          expect:
+            - statusCode: 201
+            - hasProperty: "Id"
+
+  - name: "API request with validation failure"
+    flow:
+      - post:
+          url: "/author"
+          headers:
+            Content-Type: "application/vnd.marvin.author.full+json"
+          json:
+            firstName: "John"
+            dateOfBirth: "1990-01-01"
+            genre: "Fiction"
+          expect:
+            - statusCode: 400
+
+  - name: "API request with edge case"
+    flow:
+      - post:
+          url: "/author"
+          headers:
+            Content-Type: "application/vnd.marvin.author.full+json"
+          json:
+            firstName: "Jöhn$"
+            lastName: "Doe"
+            dateOfBirth: "1990-01-01"
+            genre: "Fiction"
+          capture:
+            json: "$.id"
+            as: "authorId"
+          expect:
+            - statusCode: 201
+            - hasProperty: "Id"
+            - matchRegexp: "lastName": "^Doe$"

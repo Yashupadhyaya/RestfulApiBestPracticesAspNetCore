@@ -1,0 +1,52 @@
+config:
+  target: 'https://api.example.com'
+  phases:
+    - duration: 60
+      arrivalRate: 5
+
+scenarios:
+  - name: 'Successful API request'
+    flow:
+      - delete:
+          url: '/author/{{id}}'
+          headers:
+            Content-Type: 'application/json'
+          expect:
+            - statusCode: 204
+    # The API should successfully delete the author and return a 204 No Content status code
+
+  - name: 'API request with non-existent author'
+    flow:
+      - delete:
+          url: '/author/{{nonExistentId}}'
+          headers:
+            Content-Type: 'application/json'
+          expect:
+            - statusCode: 404
+    # The API should return a 404 Not Found status code when trying to delete a non-existent author
+
+  - name: 'API request with edge case: long UUID'
+    flow:
+      - delete:
+          url: '/author/{{longUuid}}'
+          headers:
+            Content-Type: 'application/json'
+          expect:
+            - statusCode: 400
+    # The API should return a 400 Bad Request status code when the UUID is too long
+
+  - name: 'API request with edge case: special characters in UUID'
+    flow:
+      - delete:
+          url: '/author/{{specialCharsUuid}}'
+          headers:
+            Content-Type: 'application/json'
+          expect:
+            - statusCode: 400
+    # The API should return a 400 Bad Request status code when the UUID contains special characters
+
+variables:
+  id: '3d8b2e4c-6d3f-4d91-8f62-2f2e7a3e6e0f'
+  nonExistentId: '00000000-0000-0000-0000-000000000000'
+  longUuid: '3d8b2e4c-6d3f-4d91-8f62-2f2e7a3e6e0f3d8b2e4c-6d3f-4d91-8f62-2f2e7a3e6e0f'
+  specialCharsUuid: '3d8b2e4c-6d3f-4d91-8f62-2f2e7a3e6e0f!@#$'

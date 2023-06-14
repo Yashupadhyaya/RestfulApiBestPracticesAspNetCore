@@ -1,0 +1,61 @@
+config:
+  target: "https://api.example.com"
+  phases:
+    - duration: 60
+      arrivalRate: 10
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+
+  - name: "Successful API request"
+    flow:
+      - get:
+          url: "/api/authors/{{authorId}}/books"
+          headers:
+            Authorization: "Bearer {{validToken}}"
+          capture:
+            json: "$.books"
+            as: "books"
+      - think: 1
+      - assert:
+          - statusCode: 200
+          - hasProperty: "books"
+          - equals: "{{books.length}}"
+
+  - name: "API request with non-existent author"
+    flow:
+      - get:
+          url: "/api/authors/{{nonExistentAuthorId}}/books"
+          headers:
+            Authorization: "Bearer {{validToken}}"
+      - think: 1
+      - assert:
+          - statusCode: 404
+          - hasProperty: "error"
+          - equals: "{{error}}"
+
+  - name: "API request with invalid token"
+    flow:
+      - get:
+          url: "/api/authors/{{authorId}}/books"
+          headers:
+            Authorization: "Bearer {{invalidToken}}"
+      - think: 1
+      - assert:
+          - statusCode: 401
+          - hasProperty: "error"
+          - equals: "{{error}}"
+
+  - name: "API request with edge case - large authorId"
+    flow:
+      - get:
+          url: "/api/authors/{{largeAuthorId}}/books"
+          headers:
+            Authorization: "Bearer {{validToken}}"
+      - think: 1
+      - assert:
+          - statusCode: 400
+          - hasProperty: "error"
+          - equals: "{{error}}"
