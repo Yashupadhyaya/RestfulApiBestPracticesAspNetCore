@@ -1,0 +1,64 @@
+config:
+  target: "https://api.example.com"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+
+scenarios:
+  - name: "Successful API request"
+    flow:
+      - get:
+          url: "/authors/{{ids}}"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            json: "$.authors"
+            as: "authors"
+      - log: "Received authors: {{ authors }}"
+      - think: 1
+
+  - name: "API request with validation failure"
+    flow:
+      - get:
+          url: "/authors/"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            json: "$.error"
+            as: "error"
+      - log: "Received error: {{ error }}"
+      - think: 1
+
+  - name: "API request with edge case"
+    flow:
+      - get:
+          url: "/authors/{{ids}}"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            json: "$.authors"
+            as: "authors"
+      - log: "Received authors: {{ authors }}"
+      - think: 1
+
+  - name: "API request with non-existing authors"
+    flow:
+      - get:
+          url: "/authors/{{non_existing_ids}}"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            json: "$.error"
+            as: "error"
+      - log: "Received error: {{ error }}"
+      - think: 1
+
+defaults:
+  headers:
+    x-api-key: "your-api-key"
+
+payload:
+  path: "payload.csv"
+  fields:
+    - "ids"
+    - "non_existing_ids"

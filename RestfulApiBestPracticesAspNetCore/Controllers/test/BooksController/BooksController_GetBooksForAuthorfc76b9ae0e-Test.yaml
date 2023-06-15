@@ -1,0 +1,49 @@
+config:
+  target: 'https://example.com'
+  phases:
+    - duration: 60
+      arrivalRate: 5
+  ensure:
+    p95: 200
+    maxErrorRate: 1
+
+scenarios:
+  - name: 'Successful API request'
+    flow:
+      - get:
+          url: "/api/authors/{{ authorId }}/books"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            - json: "$.authorId"
+              as: "authorId"
+          expect:
+            - statusCode: 200
+            - hasProperty: "books"
+            - hasProperty: "links"
+
+  - name: 'API request with non-existing author'
+    flow:
+      - get:
+          url: "/api/authors/{{ nonExistingAuthorId }}/books"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            - json: "$.authorId"
+              as: "nonExistingAuthorId"
+          expect:
+            - statusCode: 404
+
+  - name: 'API request with edge case - large authorId'
+    flow:
+      - get:
+          url: "/api/authors/{{ largeAuthorId }}/books"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            - json: "$.authorId"
+              as: "largeAuthorId"
+          expect:
+            - statusCode: 400
+            - hasProperty: "error"
+            - equals: "{{ error.message }}", "Invalid authorId format"

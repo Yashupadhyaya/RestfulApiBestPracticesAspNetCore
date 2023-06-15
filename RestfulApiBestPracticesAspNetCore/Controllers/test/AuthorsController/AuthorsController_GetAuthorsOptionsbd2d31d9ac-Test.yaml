@@ -1,0 +1,39 @@
+config:
+  target: 'https://example.com/api'
+  phases:
+    - duration: 60
+      arrivalRate: 5
+  defaults:
+    headers:
+      Content-Type: 'application/json'
+
+scenarios:
+  - name: 'Successful API request'
+    flow:
+      - options:
+          url: '/authors'
+        expect:
+          - statusCode: 200
+          - hasHeader: 'Allow'
+          - equals: ['GET,OPTIONS,POST']
+
+  - name: 'API request with validation failure'
+    flow:
+      - post:
+          url: '/authors'
+          json:
+            invalidField: 'test'
+        expect:
+          - statusCode: 400
+          - hasProperty: 'errorMessage'
+
+  - name: 'API request with edge case'
+    flow:
+      - post:
+          url: '/authors'
+          json:
+            name: 'John Doe!@#$%^&*()_+'
+            age: 150
+        expect:
+          - statusCode: '{{ 200..499 }}'
+          - hasProperty: 'result'

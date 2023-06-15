@@ -1,0 +1,36 @@
+config:
+  target: "https://example.com"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+
+scenarios:
+  - name: "Successful API request"
+    # Test when author does not exist and returns NotFound (404)
+    flow:
+      - post:
+          url: "/{{id}}"
+          headers:
+            Content-Type: "application/json"
+          expect:
+            - statusCode: 404
+
+  - name: "API request with validation failure"
+    # Test when author exists and returns Conflict (409)
+    flow:
+      - post:
+          url: "/{{id}}"
+          headers:
+            Content-Type: "application/json"
+          expect:
+            - statusCode: 409
+
+  - name: "API request with edge case"
+    # Test with a large GUID to ensure proper handling
+    flow:
+      - post:
+          url: "/{{large_id}}"
+          headers:
+            Content-Type: "application/json"
+          expect:
+            - statusCode: 404

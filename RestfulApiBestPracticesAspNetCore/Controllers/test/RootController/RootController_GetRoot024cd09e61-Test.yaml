@@ -1,0 +1,50 @@
+config:
+  target: "https://api.example.com"
+  phases:
+    - duration: 60
+      arrivalRate: 10
+
+scenarios:
+  - name: "Successful API request"
+    flow:
+      - get:
+          url: "/GetRoot"
+          headers:
+            Accept: "application/vnd.marvin.hateoas+json"
+          capture:
+            json: "$"
+            as: "responseBody"
+      - think: 1
+      - log: "Response: {{responseBody}}"
+      - assert:
+          - statusCode: 200
+          - responsePath: "$..rel"
+            match: "self"
+          - responsePath: "$..method"
+            match: "GET"
+
+  - name: "API request without Accept header"
+    flow:
+      - get:
+          url: "/GetRoot"
+          capture:
+            json: "$"
+            as: "responseBody"
+      - think: 1
+      - log: "Response: {{responseBody}}"
+      - assert:
+          - statusCode: 204
+
+  - name: "API request with invalid media type"
+    flow:
+      - get:
+          url: "/GetRoot"
+          headers:
+            Accept: "application/xml"
+          capture:
+            json: "$"
+            as: "responseBody"
+      - think: 1
+      - log: "Response: {{responseBody}}"
+      - assert:
+          - statusCode: 204
