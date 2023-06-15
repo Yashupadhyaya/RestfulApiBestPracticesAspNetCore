@@ -1,0 +1,52 @@
+config:
+  target: "http://dummy-api.com"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+
+scenarios:
+  - name: "Successful API request"
+    flow:
+      - patch:
+          url: "/authors/{{authorId}}/books/{{bookId}}"
+          json:
+            title: "New Title"
+            description: "New Description"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            - json: "$.id"
+              as: "bookId"
+            - json: "$.authorId"
+              as: "authorId"
+          expect:
+            - statusCode: 200
+            - hasProperty: "id"
+            - hasProperty: "authorId"
+
+  - name: "API request with validation failure"
+    flow:
+      - patch:
+          url: "/authors/{{authorId}}/books/{{bookId}}"
+          json:
+            title: ""
+            description: ""
+          headers:
+            Content-Type: "application/json"
+          expect:
+            - statusCode: 400
+            - hasProperty: "errorMessage"
+
+  - name: "API request with edge case"
+    flow:
+      - patch:
+          url: "/authors/{{authorId}}/books/{{bookId}}"
+          json:
+            title: "New Title with special characters: !@#$%^&*()"
+            description: "A very long description that exceeds the maximum allowed length for a description. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque auctor, dolor a fermentum tincidunt, lectus nisl sagittis mauris, at fermentum justo massa a mi. Curabitur sed mauris ut turpis pellentesque feugiat. Nullam euismod massa et odio ultricies, id luctus nisl venenatis."
+          headers:
+            Content-Type: "application/json"
+          expect:
+            - statusCode: "{{ some_function_that_returns_acceptable_status_codes }}"
+            - hasProperty: "id"
+            - hasProperty: "authorId"

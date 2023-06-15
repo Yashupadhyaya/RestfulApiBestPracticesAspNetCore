@@ -1,0 +1,46 @@
+config:
+  target: "https://example.com"
+  phases:
+    - duration: 60
+      arrivalRate: 10
+
+scenarios:
+  - name: "Successful API request"
+    flow:
+      - delete:
+          url: "/authors/{{id}}"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            - json: "$"
+              as: "responseBody"
+          expect:
+            - statusCode: 204
+            # No response body expected for NoContent()
+
+  - name: "API request with non-existent author"
+    flow:
+      - delete:
+          url: "/authors/{{nonExistentId}}"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            - json: "$"
+              as: "responseBody"
+          expect:
+            - statusCode: 404
+            # NotFound() should return an empty body
+
+  - name: "API request with edge case - invalid GUID"
+    flow:
+      - delete:
+          url: "/authors/invalid_guid"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            - json: "$"
+              as: "responseBody"
+          expect:
+            - statusCode: 400
+            # Invalid GUID should return a 400 Bad Request and an error message
+            - hasProperty: "error"

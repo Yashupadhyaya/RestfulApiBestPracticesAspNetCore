@@ -1,0 +1,66 @@
+config:
+  target: 'https://api.example.com'
+  phases:
+    - duration: 60
+      arrivalRate: 10
+
+scenarios:
+  - name: 'Successful API request'
+    flow:
+      - delete:
+          url: "/authors/{{authorId}}/books/{{bookId}}"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            - json: "$"
+              as: "response"
+      - think: 1
+      - assert:
+          - statusCode: 204
+          - response.body: "{{response}}"
+          - response.body.message: "Book deleted successfully"
+
+  - name: 'API request with non-existing author'
+    flow:
+      - delete:
+          url: "/authors/{{nonExistingAuthorId}}/books/{{bookId}}"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            - json: "$"
+              as: "response"
+      - think: 1
+      - assert:
+          - statusCode: 404
+          - response.body: "{{response}}"
+          - response.body.message: "Author not found"
+
+  - name: 'API request with non-existing book'
+    flow:
+      - delete:
+          url: "/authors/{{authorId}}/books/{{nonExistingBookId}}"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            - json: "$"
+              as: "response"
+      - think: 1
+      - assert:
+          - statusCode: 404
+          - response.body: "{{response}}"
+          - response.body.message: "Book not found"
+
+  - name: 'API request with edge case - large author and book IDs'
+    flow:
+      - delete:
+          url: "/authors/{{largeAuthorId}}/books/{{largeBookId}}"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            - json: "$"
+              as: "response"
+      - think: 1
+      - assert:
+          - statusCode: 400
+          - response.body: "{{response}}"
+          - response.body.message: "Invalid ID format"

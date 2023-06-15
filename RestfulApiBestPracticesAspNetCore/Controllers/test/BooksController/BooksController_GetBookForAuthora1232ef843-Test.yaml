@@ -1,0 +1,59 @@
+config:
+  target: "https://api.example.com"
+  phases:
+    - duration: 60
+      arrivalRate: 10
+
+scenarios:
+  - name: "Successful API request"
+    flow:
+      - get:
+          url: "/authors/{{ authorId }}/books/{{ bookId }}"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            json: "$.data"
+            as: "response"
+      - think: 1
+      - log: "Response: {{ response }}"
+      - assert:
+          - statusCode: 200
+          - body: "{{ response }}"
+          - equals: "{{ response.authorId }}"
+            expect: "{{ authorId }}"
+          - equals: "{{ response.id }}"
+            expect: "{{ bookId }}"
+
+  - name: "API request with validation failure"
+    flow:
+      - get:
+          url: "/authors/{{ invalidAuthorId }}/books/{{ invalidBookId }}"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            json: "$.error"
+            as: "errorResponse"
+      - think: 1
+      - log: "Error response: {{ errorResponse }}"
+      - assert:
+          - statusCode: 404
+          - body: "{{ errorResponse }}"
+          - match: "{{ errorResponse.message }}"
+            regex: ".*not found.*"
+
+  - name: "API request with edge case"
+    flow:
+      - get:
+          url: "/authors/{{ specialAuthorId }}/books/{{ specialBookId }}"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            json: "$.data"
+            as: "edgeCaseResponse"
+      - think: 1
+      - log: "Edge case response: {{ edgeCaseResponse }}"
+      - assert:
+          - statusCode: 200
+          - body: "{{ edgeCaseResponse }}"
+          - match: "{{ edgeCaseResponse.title }}"
+            regex: "^[a-zA-Z0-9\s\.\,\!\?\@\#\$\%\^\&\*\(\)\-\=\+\[\]\{\}\|\\\<\>\;\:\'\"\/]*$"

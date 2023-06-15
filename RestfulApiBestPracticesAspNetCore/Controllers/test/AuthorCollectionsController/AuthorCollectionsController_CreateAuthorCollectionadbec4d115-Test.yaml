@@ -1,0 +1,75 @@
+config:
+  target: "https://example.com"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+scenarios:
+  - name: "Successful API request"
+    flow:
+      - post:
+          url: "/api/authors"
+          json:
+            authorCollection:
+              - firstName: "John"
+                lastName: "Doe"
+                dateOfBirth: "1980-01-01"
+                genre: "Fiction"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            json: "$.authorCollection"
+            as: "createdAuthors"
+          expect:
+            - statusCode: 201
+            - hasProperty: "createdAuthors"
+
+  - name: "API request with validation failure"
+    flow:
+      - post:
+          url: "/api/authors"
+          json:
+            authorCollection:
+              - firstName: ""
+                lastName: "Doe"
+                dateOfBirth: "1980-01-01"
+                genre: "Fiction"
+          headers:
+            Content-Type: "application/json"
+          expect:
+            - statusCode: 400
+            - hasProperty: "errorMessage"
+
+  - name: "API request with edge case"
+    flow:
+      - post:
+          url: "/api/authors"
+          json:
+            authorCollection:
+              - firstName: "John"
+                lastName: "Doe"
+                dateOfBirth: "1980-01-01"
+                genre: "Fiction"
+              - firstName: "Jane"
+                lastName: "Doe"
+                dateOfBirth: "1980-01-01"
+                genre: "Fiction"
+              - firstName: "Jim"
+                lastName: "Doe"
+                dateOfBirth: "1980-01-01"
+                genre: "Fiction"
+              - firstName: "Jill"
+                lastName: "Doe"
+                dateOfBirth: "1980-01-01"
+                genre: "Fiction"
+              - firstName: "Jack"
+                lastName: "Doe"
+                dateOfBirth: "1980-01-01"
+                genre: "Fiction"
+          headers:
+            Content-Type: "application/json"
+          capture:
+            json: "$.authorCollection"
+            as: "createdAuthors"
+          expect:
+            - statusCode: 201
+            - hasProperty: "createdAuthors"
