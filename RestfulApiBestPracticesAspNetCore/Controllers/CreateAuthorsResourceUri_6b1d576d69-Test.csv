@@ -1,0 +1,11 @@
+fields,orderBy,searchQuery,genre,pageNumber,pageSize
+"Name","Ascending","John Doe","Fiction",1,20
+"Email","Descending","johndoe@example.com","Non-fiction",2,30
+"Phone Number","Ascending","1234567890","Mystery",3,40
+"Date of Birth","Descending","01-01-1990","Romance",4,50
+"Address","Ascending","123 Main St, Anytown, USA","Biography",5,60
+"ID","Descending","ABC123","Fantasy",6,70
+"Occupation","Ascending","Software Developer","Thriller",7,80
+"Company","Descending","Tech Corp","Science Fiction",8,90
+"Nationality","Ascending","American","Historical Fiction",9,100
+"Marital Status","Descending","Single","Adventure",10,110
