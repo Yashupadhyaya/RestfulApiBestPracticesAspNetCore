@@ -1,0 +1,6 @@
+id,patchDtos
+1,"[{""op"":""replace"",""path"":""/title"",""value"":""Mr""},{""op"":""replace"",""path"":""/firstName"",""value"":""John""},{""op"":""replace"",""path"":""/lastName"",""value"":""Doe""}]"
+2,"[{""op"":""replace"",""path"":""/title"",""value"":""Mrs""},{""op"":""replace"",""path"":""/firstName"",""value"":""Jane""},{""op"":""replace"",""path"":""/lastName"",""value"":""Doe""}]"
+3,"[{""op"":""replace"",""path"":""/title"",""value"":""Ms""},{""op"":""replace"",""path"":""/firstName"",""value"":""Emily""},{""op"":""replace"",""path"":""/lastName"",""value"":""Smith""}]"
+4,"[{""op"":""replace"",""path"":""/title"",""value"":""Dr""},{""op"":""replace"",""path"":""/firstName"",""value"":""Robert""},{""op"":""replace"",""path"":""/lastName"",""value"":""Johnson""}]"
+5,"[{""op"":""replace"",""path"":""/title"",""value"":""Miss""},{""op"":""replace"",""path"":""/firstName"",""value"":""Anna""},{""op"":""replace"",""path"":""/lastName"",""value"":""Taylor""}]"
